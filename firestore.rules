@@ -1,0 +1,95 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: states
+// Document ID: userId
+// Fields:
+//   - npc_counts: map (required) - Counts of NPCs by gang
+//   - logs: list (required) - Array of LogEntry objects
+//   - social_analytics: map (required) - SocialAnalytics object
+//   - neural_architecture: map (required) - NeuralArchitecture object
+//   - pending_tasks: list (required) - Array of Task objects
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "randy@lucycoreai.com" && request.auth.token.email_verified == true)); // Default admin
+    }
+
+    function isValidLog(log) {
+      return log is map &&
+             log.keys().hasAll(['timestamp', 'level', 'message', 'source']) &&
+             log.timestamp is string &&
+             log.level in ['info', 'warn', 'error', 'success'] &&
+             log.message is string &&
+             log.message.size() < 1000 &&
+             log.source is string;
+    }
+
+    function isValidAgent(agent) {
+      return agent is map &&
+             agent.keys().hasAll(['id', 'name', 'status', 'load', 'last_action', 'description', 'parameters', 'active_tasks', 'logs']) &&
+             agent.id is string &&
+             agent.name is string &&
+             agent.status in ['active', 'idle', 'busy', 'error'] &&
+             agent.load is number &&
+             agent.last_action is string &&
+             agent.description is string &&
+             agent.parameters is map &&
+             agent.active_tasks is list &&
+             agent.logs is list;
+    }
+
+    function isValidState(data) {
+      return data.keys().hasAll(['npc_counts', 'logs', 'social_analytics', 'neural_architecture', 'pending_tasks', 'active_resources', 'system_load', 'player_activity']) &&
+             data.npc_counts is map &&
+             data.logs is list &&
+             data.social_analytics is map &&
+             data.neural_architecture is map &&
+             data.pending_tasks is list &&
+             data.active_resources is list &&
+             data.system_load is map &&
+             data.player_activity is number;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /states/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidState(request.resource.data);
+      allow update: if (isOwner(userId) || isAdmin()) && isValidState(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.role == 'user';
+      allow update: if isAdmin(); // Only admins can change roles
+    }
+
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

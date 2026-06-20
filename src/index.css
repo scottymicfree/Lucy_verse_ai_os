@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-lucy-primary: #0ea5e9;
+  --color-lucy-secondary: #6366f1;
+  --color-lucy-bg: #0f172a;
+  --color-lucy-card: #1e293b;
+  --color-lucy-text: #f8fafc;
+  --color-lucy-muted: #94a3b8;
+}
+
+@layer base {
+  body {
+    @apply bg-lucy-bg text-lucy-text font-sans antialiased;
+    overflow-x: hidden;
+  }
+}
+
+.glass-card {
+  @apply bg-lucy-card/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300;
+}
+
+.glass-panel {
+  @apply bg-lucy-bg/70 backdrop-blur-2xl border-l border-white/5 shadow-2xl;
+}
+
+.animated-bg {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #0ea5e9, #3b82f6);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.status-online { @apply bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]; }
+.status-offline { @apply bg-red-500; }
+.status-warning { @apply bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]; }
+

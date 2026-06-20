@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "lucyState": {
+      "title": "Lucy State",
+      "description": "The global state of the Lucy Mobile Twin application.",
+      "type": "object",
+      "properties": {
+        "npc_counts": { "type": "object", "description": "Counts of NPCs by gang" },
+        "logs": { "type": "array", "items": { "$ref": "LogEntry" } },
+        "social_analytics": { "$ref": "SocialAnalytics" },
+        "neural_architecture": { "$ref": "NeuralArchitecture" },
+        "pending_tasks": { "type": "array", "items": { "$ref": "Task" } },
+        "active_resources": { "type": "array", "items": { "type": "string" } },
+        "system_load": { "type": "object" },
+        "player_activity": { "type": "number" }
+      },
+      "required": ["npc_counts", "logs", "social_analytics", "neural_architecture", "pending_tasks", "active_resources", "system_load", "player_activity"]
+    },
+    "LogEntry": {
+      "title": "Log Entry",
+      "description": "A single log entry.",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "level": { "type": "string", "enum": ["info", "warn", "error", "success"] },
+        "message": { "type": "string" },
+        "source": { "type": "string" }
+      },
+      "required": ["timestamp", "level", "message", "source"]
+    },
+    "SocialAnalytics": {
+      "title": "Social Analytics",
+      "description": "Social media performance metrics.",
+      "type": "object",
+      "properties": {
+        "followers": { "type": "number" },
+        "engagement_rate": { "type": "number" },
+        "post_performance": { "type": "array", "items": { "type": "object" } },
+        "scheduled_posts": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["followers", "engagement_rate", "post_performance", "scheduled_posts"]
+    },
+    "NeuralArchitecture": {
+      "title": "Neural Architecture",
+      "description": "The state of Lucy's neural modules.",
+      "type": "object",
+      "properties": {
+        "mood": { "type": "string" },
+        "active_chains": { "type": "number" },
+        "agents": { "type": "array", "items": { "$ref": "Agent" } },
+        "workflow_pipeline": { "type": "array", "items": { "$ref": "WorkflowStep" } }
+      },
+      "required": ["mood", "active_chains", "agents", "workflow_pipeline"]
+    },
+    "Agent": {
+      "title": "Agent",
+      "description": "A neural agent module.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "idle", "busy", "error"] },
+        "load": { "type": "number" },
+        "last_action": { "type": "string" },
+        "description": { "type": "string" },
+        "parameters": { "type": "object" },
+        "active_tasks": { "type": "array", "items": { "type": "object" } },
+        "logs": { "type": "array", "items": { "$ref": "LogEntry" } }
+      },
+      "required": ["id", "name", "status", "load", "last_action", "description", "parameters", "active_tasks", "logs"]
+    },
+    "WorkflowStep": {
+      "title": "Workflow Step",
+      "description": "A step in a workflow pipeline.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "running", "completed", "failed"] }
+      },
+      "required": ["id", "name", "status"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A pending task for the user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] }
+      },
+      "required": ["id", "title", "status", "priority"]
+    }
+  },
+  "firestore": {
+    "/states/{stateId}": {
+      "schema": "lucyState",
+      "description": "Global state for a specific user or session."
+    }
+  }
+}
