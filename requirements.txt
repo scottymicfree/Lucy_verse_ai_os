@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+aiohttp
+openai
+pydub
+python-jose[cryptography]
+PyNaCl
+requests
