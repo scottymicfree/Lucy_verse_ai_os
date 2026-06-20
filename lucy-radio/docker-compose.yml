@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  icecast:
+    image: moul/icecast
+    container_name: lucy_icecast
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./icecast/icecast.xml:/etc/icecast2/icecast.xml:ro
+    environment:
+      - ICECAST_CONFIG=/etc/icecast2/icecast.xml
+
+  liquidsoap:
+    image: savonet/liquidsoap:2.2.4
+    container_name: lucy_liquidsoap
+    restart: unless-stopped
+    depends_on:
+      - icecast
+    volumes:
+      - ./liquidsoap/radio.liq:/radio.liq:ro
+      - ./music:/music:ro
+    command: ["liquidsoap", "/radio.liq"]
+    environment:
+      - TZ=UTC
