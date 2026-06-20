@@ -2,7 +2,7 @@ Lucy Verse AI OS (Phase 2)
 Welcome to Phase 2 of the Lucy Verse AI OS architecture. This phase marks the transition from fragmented component prototyping toward a unified, event-driven, sovereign agentic operating system. Phase 2 focuses on establishing robust multi-domain integration, securing the core runtime environment, and preparing the framework for standalone deployment.
 
 https://www.linkedin.com/in/randy-webb
-
+https://github.com/scottymicfree/Lucy-unified-Emma-.git
 
 https://x.com/scottymicfree
 
