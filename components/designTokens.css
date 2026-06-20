@@ -1,0 +1,67 @@
+/* designTokens.css */
+:root {
+  /* Light theme */
+  --color-bg: hsl(210, 20%, 98%);
+  --color-surface: hsl(210, 20%, 100%);
+  --color-primary: hsl(220, 80%, 56%);
+  --color-primary-foreground: hsl(0, 0%, 100%);
+  --color-muted: hsl(210, 15%, 92%);
+  --color-muted-foreground: hsl(210, 15%, 40%);
+  --color-border: hsl(210, 15%, 85%);
+  --color-input: hsl(210, 15%, 94%);
+  --color-ring: hsl(220, 80%, 56%);
+  --sound-volume-default: 0.3;
+  --sound-volume-error: 0.2;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: hsl(210, 15%, 10%);
+    --color-surface: hsl(210, 15%, 12%);
+    --color-primary: hsl(220, 80%, 66%);
+    --color-primary-foreground: hsl(0, 0%, 100%);
+    --color-muted: hsl(210, 10%, 22%);
+    --color-muted-foreground: hsl(210, 10%, 65%);
+    --color-border: hsl(210, 10%, 30%);
+    --color-input: hsl(210, 10%, 20%);
+    --color-ring: hsl(220, 80%, 66%);
+  }
+}
+
+/* Global resets and utilities */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-muted-foreground);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
