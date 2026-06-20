@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+apscheduler
+pydantic
+httpx
+aiosqlite
+redis
+rq

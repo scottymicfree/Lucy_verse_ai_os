@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Lucy Radio</title>
+</head>
+<body style="margin:0;background:transparent;overflow:hidden;">
+  <audio id="lucy-radio" src="http://localhost:8000/live"></audio>
+  <script>
+    const { ipcRenderer } = require('electron');
+    const audio = document.getElementById('lucy-radio');
+    ipcRenderer.on('radio:play', () => { audio.play(); });
+    ipcRenderer.on('radio:stop', () => { audio.pause(); });
+    ipcRenderer.on('radio:setVolume', (event, vol) => { audio.volume = vol; });
+  </script>
+</body>
+</html>

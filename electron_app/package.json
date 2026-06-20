@@ -1,0 +1,12 @@
+{
+  "name": "lucy-electron-stub",
+  "version": "0.1.0",
+  "main": "main_stub.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^26.0.0",
+    "node-fetch": "^3.4.0"
+  }
+}

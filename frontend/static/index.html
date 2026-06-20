@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+  <head>
+	<meta charset="utf-8" />
+	<title>Lucy Mirror Panel</title>
+	<style>
+	  body { font-family: Arial, sans-serif; margin: 0; background: #0b0b0f; color: #fff }
+	  .container { display:flex; height:100vh }
+	  .panel { flex:1; padding:12px; box-sizing:border-box }
+	  .mirror { flex:2; background:#111; border:1px solid #222; }
+	  .controls { width:360px; background:#0f1720; border-left:1px solid #222; padding:12px }
+	  button { margin:6px 0; padding:8px 12px; width:100% }
+	  pre { background:#05050a; padding:8px; height: 200px; overflow:auto }
+	</style>
+  </head>
+  <body>
+	<div class="container">
+	  <div class="leftnav">
+		<h3>Lucy OS</h3>
+		<ul>
+		  <li>Browser Mirror</li>
+		  <li>System Status</li>
+		  <li>Logs</li>
+		  <li>Settings</li>
+		</ul>
+	  </div>
+	  <div class="main">
+		<div class="topbar">
+		  <label class="theme-toggle small">Theme <select id="themeSelect"><option value="system">System</option><option value="dark">Dark</option><option value="light">Light</option></select></label>
+		</div>
+		<div class="mirror-wrap">
+		  <div class="mirror-card panel mirror">
+		<h2>Mirrored Browser Panel</h2>
+		<div style="background:#000; height:70%; display:flex; align-items:center; justify-content:center">
+		  <video id="mirrorVideo" autoplay muted playsinline style="width:90%; height:90%; background:#000; border:1px solid #333"></video>
+		</div>
+		<div style="margin-top:8px">
+		  <button id="registerMirror">Register Mirror</button>
+	  </div>
+	</div>
+
+	<!-- Ask Lucy modal placeholder (will be triggered on drop) -->
+	<div id="askLucy" class="hidden"></div>
+		</div>
+	  </div>
+	  <div class="controls panel">
+		<h3>Lucy Toolbelt</h3>
+		<button class="btn" id="cursorClick">Cursor Click</button>
+		<button id="keyboardType">Type Hello</button>
+		<button id="spotifyPlay">Spotify Play (stub)</button>
+		<button id="teGenerate">TE v2 Generate (stub)</button>
+
+		<h3>Action Log</h3>
+		<pre id="logView">Loading logs...</pre>
+
+		<div id="toasts"></div>
+
+	  </div>
+	</div>
+
+  <script>
+	// Smooth theme transition init
+	document.documentElement.style.transition = 'background .25s ease, color .25s ease'
+	  async function callToolbelt(path, body) {
+		if (window.electron && window.electron.toolbeltCall) {
+		  return await window.electron.toolbeltCall(path, body)
+		}
+		// fallback direct fetch to toolbelt api
+		try {
+		  const res = await fetch('http://localhost:8001' + path, {
+			method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+		  })
+		  return await res.json()
+		} catch (e) {
+		  return { ok: false, error: String(e) }
+		}
+	  }
+
+	  document.getElementById('cursorClick').addEventListener('click', async () => {
+		const r = await callToolbelt('/cursor/click', { x: null, y: null, button: 'left' })
+		console.log('click', r)
+		loadLogs()
+	  })
+
+	  document.getElementById('keyboardType').addEventListener('click', async () => {
+		const r = await callToolbelt('/keyboard/type', { text: 'Hello from Lucy' })
+		console.log('type', r)
+		loadLogs()
+	  })
+
+	  document.getElementById('spotifyPlay').addEventListener('click', async () => {
+		const r = await callToolbelt('/spotify/control', { action: 'play', metadata: null })
+		console.log('spotify', r)
+		loadLogs()
+	  })
+
+	  document.getElementById('teGenerate').addEventListener('click', async () => {
+		const r = await callToolbelt('/te_v2/execute', { prompt: 'Create a test image' })
+		console.log('te', r)
+		loadLogs()
+	  })
+
+	  document.getElementById('registerMirror').addEventListener('click', async () => {
+		const r = await callToolbelt('/mirror/register', { id: 'mirror-1', url: 'about:blank' })
+		console.log('registered', r)
+		loadLogs()
+	  })
+
+	  // Theme handling
+	  const themeSelect = document.getElementById('themeSelect')
+	  const applyTheme = (t) => {
+		document.documentElement.classList.toggle('light', t === 'light')
+		localStorage.setItem('lucy_theme', t)
+	  }
+	  themeSelect.addEventListener('change', (e) => applyTheme(e.target.value))
+	  const saved = localStorage.getItem('lucy_theme') || 'system'
+	  themeSelect.value = saved
+	  applyTheme(saved)
+
+	  // Drag-and-drop
+	  const mirror = document.getElementById('mirrorVideo')
+	  mirror.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' })
+	  mirror.addEventListener('drop', async (e) => {
+		e.preventDefault()
+		const file = e.dataTransfer.files[0]
+		if (!file) return
+		const reader = new FileReader()
+		reader.onload = async () => {
+			const b64 = reader.result.split(',')[1]
+			if (window.electronDrop && window.electronDrop.handleDroppedFile) {
+				const res = await window.electronDrop.handleDroppedFile(file.name, b64)
+				console.log('dropped res', res)
+				showToast('File dropped: ' + file.name)
+				// show Ask Lucy modal (simplified)
+				// render simple modal UI
+				document.getElementById('askLucy').innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center"><div style="background:#fff;padding:16px;width:520px;border-radius:8px"><h3>What would you like Lucy to do with this file?</h3><select id='askAction'><option value='set_wallpaper'>Set as wallpaper</option><option value='analyze'>Analyze image</option><option value='transcribe'>Transcribe audio</option><option value='summarize'>Summarize text</option><option value='open'>Open with toolbelt</option></select><div style='margin-top:8px'><input id='askFree' placeholder='Ask Lucy...' style='width:100%;padding:8px' /></div><div style='margin-top:12px;display:flex;justify-content:flex-end;gap:8px'><button id='askCancel'>Cancel</button><button id='askSend'>Send</button></div></div></div>`
+				document.getElementById('askLucy').classList.remove('hidden')
+				document.getElementById('askCancel').addEventListener('click', () => { document.getElementById('askLucy').innerHTML=''; document.getElementById('askLucy').classList.add('hidden') })
+				document.getElementById('askSend').addEventListener('click', async () => {
+					const action = document.getElementById('askAction').value
+					const free = document.getElementById('askFree').value
+					document.getElementById('askLucy').innerHTML=''
+					document.getElementById('askLucy').classList.add('hidden')
+					await callToolbelt('/file/dropped', { path: res.path, action, prompt: free })
+					showToast('Requested: ' + action)
+				})
+			}
+		}
+		reader.readAsDataURL(file)
+	  })
+
+	  function showToast(msg) {
+		const id = 't' + Date.now()
+		const el = document.createElement('div')
+		el.className = 'toast'
+		el.id = id
+		el.textContent = msg
+		document.getElementById('toasts').appendChild(el)
+		setTimeout(() => el.remove(), 5000)
+	  }
+
+	  async function loadLogs() {
+		try {
+		  const r = await fetch('/api/logs')
+		  const j = await r.json()
+		  if (j.ok) {
+			document.getElementById('logView').textContent = j.content
+		  } else {
+			document.getElementById('logView').textContent = 'log not available'
+		  }
+		} catch (e) {
+		  document.getElementById('logView').textContent = String(e)
+		}
+	  }
+
+	  loadLogs()
+	  setInterval(loadLogs, 3000)
+	</script>
+  </body>
+</html>

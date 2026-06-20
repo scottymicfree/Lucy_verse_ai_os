@@ -1,0 +1,1 @@
+Mirror panel placeholder. In a full app, import MirrorPanel into the Next.js renderer and mount at /mirror.
