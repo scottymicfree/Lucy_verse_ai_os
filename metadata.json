@@ -1,6 +1,5 @@
 {
-  "name": "",
-  "description": "",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "name": "Lucy Mobile Twin",
+  "description": "A lightweight, synchronized mobile interface for Lucy, allowing remote monitoring, debugging, and command execution for FXServer.",
+  "requestFramePermissions": ["microphone"]
 }
